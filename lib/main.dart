@@ -379,20 +379,89 @@ class FitnessApp extends StatelessWidget {
   }
 }
 
-// FIX: SplashRouter ensures correct routing based on initialized state and profile existence.
-class SplashRouter extends StatelessWidget {
+class SplashScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Defines the dark blue color using the hex value 0xFF093766
+    const Color darkBlueBackground = Color(0x3291B6);
+    
+    return const Scaffold(
+      // Set the background color explicitly
+      backgroundColor: darkBlueBackground, 
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // --- Simple Logo Placeholder ---
+            Icon(
+              Icons.fitness_center, 
+              size: 80, 
+              color: Colors.white,
+            ),
+            SizedBox(height: 16),
+            
+            // --- App Name ---
+            Text(
+              'FitUnique',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.5
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SplashRouter extends StatefulWidget {
+  @override
+  _SplashRouterState createState() => _SplashRouterState();
+}
+
+class _SplashRouterState extends State<SplashRouter> {
+  // 0: Splash, 1: Check Auth
+  int _status = 0; 
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    // Loads for 1-2 seconds
+    Timer(const Duration(seconds: 2), () {
+      setState(() {
+        // Move from Splash state to Auth check state
+        _status = 1; 
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = Provider.of<AppState>(context);
 
+    // STEP 1: Show Splash Screen first
+    if (_status == 0) {
+      return SplashScreen();
+    }
+    
+    // STEP 2: Check initialization status after timer runs out
     if (!app.initialized) {
       // Show simple loading screen while SharedPreferences load
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    // Check if profile exists; if not, go to onboarding/creation.
+    
+    // STEP 3: Route based on profile status
     if (app.profile == null) {
       return OnboardingScreens();
     }
+    
     // If profile exists, go straight home.
     return HomeScreen();
   }
